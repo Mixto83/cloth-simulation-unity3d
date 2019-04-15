@@ -124,16 +124,19 @@ public class MassSpringCloth : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (this.Paused)
-            return; // Not simulating
-
-        // Select integration method
-        switch (this.IntegrationMethod)
+        for(int i = 0; i < 10; i++)
         {
-            case Integration.Explicit: this.stepExplicit(); break;
-            case Integration.Symplectic: this.stepSymplectic(); break;
-            default:
-                throw new System.Exception("[ERROR] Should never happen!");
+            if (this.Paused)
+                return; // Not simulating
+
+            // Select integration method
+            switch (this.IntegrationMethod)
+            {
+                case Integration.Explicit: this.stepExplicit(); break;
+                case Integration.Symplectic: this.stepSymplectic(); break;
+                default:
+                    throw new System.Exception("[ERROR] Should never happen!");
+            }
         }
 
     }
