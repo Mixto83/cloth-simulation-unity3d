@@ -12,5 +12,3 @@ Simulation of cloth physics for unity3d using a spring-mass model. Exercise prop
 4- Damping force.
 
 5- Wind force.
-
-6- Collisions (TODO)
