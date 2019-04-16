@@ -3,14 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// Basic physics manager capable of simulating a given ISimulable
-/// implementation using diverse integration methods: explicit,
-/// implicit, Verlet and semi-implicit.
+/// Cloth physics manager that makes use of the mass-spring model
+/// to simulate the behaviour of a cloth on a mesh
 /// </summary>
 public class MassSpringCloth : MonoBehaviour 
 {
 	/// <summary>
-	/// Default constructor. Zero all. 
+	/// Default constructor.
 	/// </summary>
 	public MassSpringCloth()
 	{
@@ -31,17 +30,22 @@ public class MassSpringCloth : MonoBehaviour
 
 	#region InEditorVariables
 
+    //Simulation variables
 	public bool Paused;
 	public float TimeStep;
     public Vector3 Gravity;
 	public Integration IntegrationMethod;
 
+    //Mesh component variables
     Mesh mesh;
     Vector3[] vertices;
+
+    //Lists
     List<Spring> springs = new List<Spring>();
     List<Node> nodes = new List<Node>();
     List<Triangle> clothTriangles = new List<Triangle>();
 
+    //Physics constants and properties
     public float nodeMass = 0.5f;
     public float stiffnessFlex = 50.0f;
     public float stiffnessTrac = 500.0f;
@@ -66,44 +70,41 @@ public class MassSpringCloth : MonoBehaviour
         return nodes;
     }
 
-    public void setNodes(List<Node> nodes)
-    {
-        this.nodes = nodes;
-    }
-
     #endregion
 
     #region MonoBehaviour
 
+    //Se utiliza Awake() para que todas las mallas queden inicializadas antes de ser fijadas por el Fixer
     public void Awake()
     {
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
         int[] triangles = mesh.triangles;
 
+        //Se añaden los nodos a partir de las posiciones de los vertices del mesh
         foreach(Vector3 v in vertices)
         {
             nodes.Add(new Node(transform.TransformPoint(v), Gravity, nodeMass, dampAlpha));
         }
+
         EdgeEqualityComparer edgeComparer = new EdgeEqualityComparer();
 
         var edgeDictionary = new Dictionary<Edge, Edge>(edgeComparer);
 
         for (int i = 0; i < triangles.Length;i += 3)
         {
+            //Se intentan añadir 3 aristas de un triangulo al diccionario
             //Arista 1
-            Edge edge = new Edge(triangles[i], triangles[i + 1], triangles[i + 2]);
-            tryAddEdge(edge, edgeDictionary);
+            addEdge(new Edge(triangles[i], triangles[i + 1], triangles[i + 2]), edgeDictionary);
             //Arista 2
-            edge = new Edge(triangles[i + 1], triangles[i + 2], triangles[i]);
-            tryAddEdge(edge, edgeDictionary);
+            addEdge(new Edge(triangles[i + 1], triangles[i + 2], triangles[i]), edgeDictionary);
             //Arista 3
-            edge = new Edge(triangles[i], triangles[i + 2], triangles[i + 1]);
-            tryAddEdge(edge, edgeDictionary);
+            addEdge(new Edge(triangles[i], triangles[i + 2], triangles[i + 1]), edgeDictionary);
 
             //Añade triangulo a la lista
             clothTriangles.Add(new Triangle(nodes[triangles[i]], nodes[triangles[i + 1]], nodes[triangles[i + 2]]));
         } 
+        //Las aristas del diccionario se añaden como muelles a la lista
         foreach(KeyValuePair<Edge, Edge> e in edgeDictionary)
         {
             springs.Add(new Spring(nodes[e.Key.vertexA], nodes[e.Key.vertexB], stiffnessTrac, dampBeta));
@@ -124,7 +125,7 @@ public class MassSpringCloth : MonoBehaviour
 
     public void FixedUpdate()
     {
-        for(int i = 0; i < 10; i++)
+        for(int i = 0; i < 1/(TimeStep*100); i++)
         {
             if (this.Paused)
                 return; // Not simulating
@@ -143,8 +144,11 @@ public class MassSpringCloth : MonoBehaviour
 
     #endregion
 
-
-    private void tryAddEdge(Edge edge, Dictionary<Edge, Edge> dictionary)
+    /// <summary>
+    /// Tries to add an edge to the dictionary, if that edge is duplicate, a flexion spring formed by the opposing vertices
+    /// is added to the spring list instead
+    /// </summary>
+    private void addEdge(Edge edge, Dictionary<Edge, Edge> dictionary)
     {
         Edge otherEdge;
         if(dictionary.TryGetValue(edge, out otherEdge))
@@ -172,6 +176,10 @@ public class MassSpringCloth : MonoBehaviour
         {
             springs[i].computeForce();
         }
+        for (int i = 0; i < clothTriangles.Count; i++)
+        {
+            clothTriangles[i].computeWindForce(friction, windVel);
+        }
         for (int i = 0; i < nodes.Count; i++)
         {
             if (!nodes[i].isFixed)
@@ -187,19 +195,23 @@ public class MassSpringCloth : MonoBehaviour
 	/// </summary>
 	private void stepSymplectic()
 	{
+        //Se calcula la fuerza de cada nodo
         for (int i = 0; i < nodes.Count; i++)
         {
             nodes[i].force = Vector3.zero;
             nodes[i].computeForce();
         }
+        //Se calcula la fuerza de cada muelle
         for (int i = 0; i < springs.Count; i++)
         {
             springs[i].computeForce();
         }
+        //Se calcula la fuerza de viento aplicada a cada triangulo
         for (int i = 0; i < clothTriangles.Count; i++)
         {
-            clothTriangles[i].computeForce(friction, windVel);
+            clothTriangles[i].computeWindForce(friction, windVel);
         }
+        //Se aplican las fuerzas para calcular la velocidad y la posicion de cada nodo (A no ser que estén fijados)
         for (int i = 0; i < nodes.Count; i++)
         {
             if (!nodes[i].isFixed)

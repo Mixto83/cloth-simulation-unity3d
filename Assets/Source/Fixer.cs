@@ -30,16 +30,5 @@ public class Fixer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        /*collider = GetComponent<Collider>();
-        foreach (MassSpringCloth c in cloths)
-        {
-            foreach (Node n in c.getNodes())
-            {
-                if (collider.bounds.Contains(n.pos))
-                {
-                    n.isFixed = true;
-                }
-            }
-        }*/
     }
 }

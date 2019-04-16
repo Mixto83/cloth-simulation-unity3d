@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class Node
 {
     /// <summary>
-    /// Default constructor. Zero all. 
+    /// Default constructor. 
     /// </summary>
     public Node(Vector3 pos, Vector3 gravity, float mass, float alpha)
     {
@@ -31,7 +31,6 @@ public class Node
     public bool isFixed;
     public Vector3 gravity;
     public float alpha;
-    public float area;
 
     #endregion
     #region OtherVariables
@@ -40,9 +39,13 @@ public class Node
 
     #region OtherFunctions
 
+    /// <summary>
+    /// Computes the node's force
+    /// </summary>
     public void computeForce()
     {
         force += mass * gravity;
+        //Fuerza de amortiguamiento
         force -= alpha * mass * vel;
     }
 
