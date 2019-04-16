@@ -84,7 +84,7 @@ public class MassSpringCloth : MonoBehaviour
         //Se añaden los nodos a partir de las posiciones de los vertices del mesh
         foreach(Vector3 v in vertices)
         {
-            nodes.Add(new Node(transform.TransformPoint(v), Gravity, nodeMass, dampAlpha));
+            nodes.Add(new Node(transform.TransformPoint(v), Gravity, nodeMass, dampAlpha, friction));
         }
 
         EdgeEqualityComparer edgeComparer = new EdgeEqualityComparer();
@@ -178,7 +178,7 @@ public class MassSpringCloth : MonoBehaviour
         }
         for (int i = 0; i < clothTriangles.Count; i++)
         {
-            clothTriangles[i].computeWindForce(friction, windVel);
+            clothTriangles[i].computeWindForce(windVel);
         }
         for (int i = 0; i < nodes.Count; i++)
         {
@@ -209,7 +209,7 @@ public class MassSpringCloth : MonoBehaviour
         //Se calcula la fuerza de viento aplicada a cada triangulo
         for (int i = 0; i < clothTriangles.Count; i++)
         {
-            clothTriangles[i].computeWindForce(friction, windVel);
+            clothTriangles[i].computeWindForce(windVel);
         }
         //Se aplican las fuerzas para calcular la velocidad y la posicion de cada nodo (A no ser que estén fijados)
         for (int i = 0; i < nodes.Count; i++)

@@ -12,13 +12,14 @@ public class Node
     /// <summary>
     /// Default constructor. 
     /// </summary>
-    public Node(Vector3 pos, Vector3 gravity, float mass, float alpha)
+    public Node(Vector3 pos, Vector3 gravity, float mass, float alpha, float friction)
     {
         this.pos = pos;
         this.vel = Vector3.zero;
         this.mass = mass;
         this.gravity = gravity;
         this.alpha = alpha;
+        this.friction = friction;
     }
 
 
@@ -31,6 +32,7 @@ public class Node
     public bool isFixed;
     public Vector3 gravity;
     public float alpha;
+    public float friction;
 
     #endregion
     #region OtherVariables

@@ -41,15 +41,6 @@ public class Spring
     #region OtherFunctions
 
     /// <summary>
-    /// Returns current spring length
-    /// </summary>
-    /// <returns></returns>
-    public float getLength()
-    {
-        return Vector3.Distance(nodeA.pos, nodeB.pos);
-    }
-
-    /// <summary>
     /// Computes the spring's force and applies it to its nodes
     /// </summary>
     public void computeForce()
@@ -68,6 +59,15 @@ public class Spring
     public Vector3 getUnitVector()
     {
         return (nodeA.pos - nodeB.pos) / getLength();
+    }
+
+    /// <summary>
+    /// Returns current spring length
+    /// </summary>
+    /// <returns></returns>
+    public float getLength()
+    {
+        return Vector3.Distance(nodeA.pos, nodeB.pos);
     }
 
     #endregion

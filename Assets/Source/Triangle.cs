@@ -51,10 +51,10 @@ public class Triangle {
     /// </summary>
     /// <param name="friction"></param>
     /// <param name="windVel"></param>
-    public void computeWindForce(float friction, Vector3 windVel)
+    public void computeWindForce(Vector3 windVel)
     {
         //Fuerza de viento
-        Vector3 force = friction * getArea() * Vector3.Dot(getNormal(), (windVel - getVel())) * getNormal();
+        Vector3 force = nodeA.friction * getArea() * Vector3.Dot(getNormal(), (windVel - getVel())) * getNormal();
 
         nodeA.force += force/3;
         nodeB.force += force/3;
